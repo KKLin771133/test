@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天秤觀察室：吉卜力風互動教材</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+    <style>
+        /* 吉卜力精美色彩計畫 */
+        :root {
+            --sky-blue: #9ad5e5;
+            --grass-light: #9bc077;
+            --grass-dark: #6e9a56;
+            --wood-light: #9c7860;
+            --wood-dark: #6b4c3a;
+            --paper: #fcf9f2;
+            --leaf: #2e5c2b;
+            --accent-orange: #f48b69;
+            --add-btn-bg: #e8f5e9; 
+            --sub-btn-bg: #ffebee; 
+            --weight-metal: #7f8c8d; 
+            --var-color: #ff9f43;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: #c9e0b8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iansui', "Cambria Math", Cambria, serif;
+            overflow: hidden;
+        }
+
+        .math-font { font-family: "Cambria Math", Cambria, serif; }
+
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            background: linear-gradient(180deg, var(--sky-blue) 0%, #c1e4eb 45%, var(--grass-light) 45%, var(--grass-dark) 100%);
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 12px solid #fff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        /* 雲朵動畫 */
+        .cloud {
+            position: absolute; background: #fff; border-radius: 50px; opacity: 0.9;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); animation: drift linear infinite;
+        }
+        .cloud::after, .cloud::before { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+        .c1 { width: 140px; height: 45px; top: 60px; left: 80px; animation-duration: 45s; }
+        .c1::before { width: 60px; height: 60px; top: -30px; left: 20px; }
+        .c1::after { width: 80px; height: 80px; top: -40px; right: 20px; }
+        .c2 { width: 200px; height: 60px; top: 100px; right: 100px; animation-duration: 60s; opacity: 0.7;}
+        .c2::before { width: 80px; height: 80px; top: -40px; left: 30px; }
+        .c2::after { width: 100px; height: 100px; top: -50px; right: 30px; }
+
+        @keyframes drift { from { transform: translateX(-300px); } to { transform: translateX(1400px); } }
+
+        /* 標題與切換 */
+        .header {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #ffffff; padding: 15px 50px; border-radius: 60px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05), inset 0 -4px 0 rgba(0,0,0,0.05); text-align: center; z-index: 10;
+        }
+        .header h1 { margin: 0 0 10px 0; color: var(--leaf); font-size: 36px; letter-spacing: 2px; }
+        .mode-switch { display: flex; gap: 15px; justify-content: center; }
+        .btn-mode {
+            padding: 6px 25px; border: 2px solid var(--wood-light); background: #fff;
+            border-radius: 25px; cursor: pointer; font-size: 18px; font-family: inherit;
+            color: var(--wood-dark); transition: all 0.3s;
+        }
+        .btn-mode:hover { background: #fffdeb; }
+        .btn-mode.active { background: var(--wood-light); color: #fff; box-shadow: inset 0 3px 5px rgba(0,0,0,0.2); }
+
+        /* 互動區域 */
+        .interaction-area {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 150px 40px 0 40px; height: 100%;
+        }
+
+        /* 控制面板卡片 (加寬以容納 2x2 網格) */
+        .control-card {
+            background: var(--paper); border-radius: 20px; border: 3px solid var(--wood-light);
+            padding: 15px; width: 330px; box-shadow: 6px 6px 0 rgba(107, 76, 58, 0.2); position: relative;
+        }
+        .control-card::before {
+            content: ''; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border: 1px dashed #d7ccc8; border-radius: 12px; pointer-events: none;
+        }
+        .control-card h3 { margin: 0 0 10px 0; color: var(--wood-dark); text-align: center; font-size: 24px; position: relative; z-index: 1; }
+
+        /* 網格排版：2 欄 2 列 */
+        .weight-btn-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+            position: relative; z-index: 1; margin-bottom: 12px;
+        }
+
+        .btn-weight {
+            border: 2px solid #bcaaa4; border-radius: 8px; padding: 8px 5px;
+            cursor: pointer; font-size: 17px; font-family: inherit; color: #4e342e;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: all 0.15s; box-shadow: 0 3px 0 #d7ccc8; font-weight: bold;
+        }
+        .btn-weight:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 0 0 #d7ccc8; }
+        .btn-weight:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; border-color: #d7ccc8; }
+
+        /* 未知數按鈕專屬色 */
+        .btn-weight.var { border-color: var(--var-color); }
+        .btn-weight.add { background-color: var(--add-btn-bg); color: var(--leaf); }
+        .btn-weight.add.var { background-color: #fff3e0; color: #d84315; border-color: #ffb74d; }
+        .btn-weight.add:hover:not(:disabled) { filter: brightness(0.95); }
+        
+        .btn-weight.sub { background-color: var(--sub-btn-bg); color: #d84315; border-color: var(--accent-orange); }
+        .btn-weight.sub.var { background-color: #fff3e0; color: #d84315; border-color: #ffb74d; }
+        .btn-weight.sub:hover:not(:disabled) { filter: brightness(0.95); }
+
+        .btn-sub-label { font-size: 11px; opacity: 0.8; font-weight: normal; margin-top: 2px; }
+        .math-txt { font-family: "Cambria Math", Cambria, serif; font-size: 18px; }
+
+        /* 重設按鈕 */
+        .reset-btn {
+            width: 100%; background-color: var(--paper); border: 2px solid var(--wood-light);
+            color: var(--wood-dark); padding: 10px; font-size: 18px; font-family: inherit; font-weight: bold;
+            border-radius: 8px; cursor: pointer; margin-top: 10px; transition: background 0.2s;
+            position: relative; z-index: 1; box-shadow: 0 3px 0 rgba(107, 76, 58, 0.2);
+        }
+        .reset-btn:hover { background-color: #fffdeb; }
+
+        /* 天平結構 */
+        .balance-box { display: flex; flex-direction: column; align-items: center; margin-top: -30px; }
+        .balance-beam-container { width: 500px; height: 320px; position: relative; }
+        .pillar {
+            width: 35px; height: 220px; background: linear-gradient(to right, var(--wood-dark) 0%, var(--wood-light) 50%, var(--wood-dark) 100%);
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); border-radius: 10px 10px 0 0; box-shadow: 5px 0 10px rgba(0,0,0,0.15);
+        }
+        .pillar-base {
+            width: 120px; height: 25px; background: var(--wood-dark); position: absolute; bottom: -5px;
+            left: 50%; transform: translateX(-50%); border-radius: 15px 15px 5px 5px; box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        .beam {
+            width: 460px; height: 18px; background: linear-gradient(to bottom, var(--wood-light) 0%, var(--wood-dark) 100%);
+            position: absolute; top: 90px; left: 20px; border-radius: 10px; transform-origin: center center;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5; box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .beam::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 12px; height: 12px; background: #3e2723; border-radius: 50%; border: 2px solid #5d4037;
+        }
+
+        .pan-group { position: absolute; top: 5px; display: flex; flex-direction: column; align-items: center; transition: transform 0.6s; }
+        .pan-group.left { left: 10px; transform-origin: center top; }
+        .pan-group.right { right: 10px; transform-origin: center top; }
+        .string { width: 80px; height: 140px; border-left: 2px solid #5d4037; border-right: 2px solid #5d4037; position: relative; margin-top: 5px; }
+        
+        .pan {
+            width: 150px; height: 22px; background: linear-gradient(to bottom, #d7ccc8, #a1887f); border-radius: 0 0 70px 70px;
+            display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
+            padding: 5px 10px; gap: 4px; box-shadow: 0 8px 10px rgba(0,0,0,0.2); position: relative; margin-top: -5px; z-index: 6;
+        }
+
+        /* 課本風砝碼 (保留提把) */
+        .item {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; box-shadow: 1px 3px 5px rgba(0,0,0,0.3); animation: dropIn 0.2s ease-out;
+        }
+        .item::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); background: var(--weight-metal); border-radius: 3px 3px 0 0; }
+        @keyframes dropIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .w-1 { width: 28px; height: 32px; font-size: 14px; background: linear-gradient(135deg, #bdc3c7, #95a5a6); border-radius: 4px 4px 2px 2px; }
+        .w-1::before { width: 35%; height: 6px; }
+        .w-5 { width: 38px; height: 44px; font-size: 18px; background: linear-gradient(135deg, #95a5a6, #7f8c8d); border-radius: 5px 5px 2px 2px; }
+        .w-5::before { width: 35%; height: 7px; top: -7px; }
+        .w-10 { width: 48px; height: 56px; font-size: 22px; background: linear-gradient(135deg, #7f8c8d, #636e72); border-radius: 6px 6px 3px 3px; }
+        .w-10::before { width: 40%; height: 8px; top: -8px; }
+
+        /* 未知數袋子 */
+        .variable-x { 
+            width: 45px; height: 65px; background: radial-gradient(circle at 30% 30%, #ffcc80, var(--accent-orange));
+            border-radius: 50% 50% 10px 10px; font-size: 28px; border-bottom: 4px solid #d84315; color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .variable-x::before { display: none; } 
+
+        /* 提示文字 */
+        .instruction {
+            margin-top: 10px; background: rgba(255, 255, 255, 0.9); padding: 10px 25px; border-radius: 30px;
+            font-size: 20px; color: #4e342e; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px dashed #bcaaa4; max-width: 600px; z-index: 10; line-height: 1.4;
+        }
+
+        /* 算式區域 */
+        .formula-container {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--paper); padding: 10px 60px; border-radius: 20px; border: 4px solid var(--wood-light);
+            font-size: 46px; color: var(--leaf); box-shadow: 0 10px 0 rgba(107, 76, 58, 0.2); font-weight: bold; letter-spacing: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+
+    <div class="header">
+        <h1>天秤觀察室</h1>
+        <div class="mode-switch">
+            <button id="btn-eq" class="btn-mode active" onclick="setMode('eq')">等量公理 (方程式)</button>
+            <button id="btn-ineq" class="btn-mode" onclick="setMode('ineq')">不等式性質</button>
+        </div>
+    </div>
+
+    <div class="interaction-area">
+        <div class="control-card">
+            <h3>左側天秤 <span class="math-font">(Left)</span></h3>
+            <div class="weight-btn-grid">
+                <button class="btn-weight add var" onclick="add('left', 'v')"><span class="math-txt var-add-txt">+ y</span> <span class="btn-sub-label">🎁 未知數袋</span></button>
+                <button class="btn-weight add" onclick="add('left', 1)"><span class="math-txt">+ 1g</span> <span class="btn-sub-label">🌿 增加</span></button>
+                <button class="btn-weight add" onclick="add('left', 5)"><span class="math-txt">+ 5g</span> <span class="btn-sub-label">🌳 增加</span></button>
+                <button class="btn-weight add" onclick="add('left', 10)"><span class="math-txt">+ 10g</span> <span class="btn-sub-label">🌲 增加</span></button>
+            </div>
+            <div class="weight-btn-grid">
+                <button class="btn-weight sub var" id="sub-left-v" onclick="removeWeight('left', 'v')"><span class="math-txt var-sub-txt">- y</span> <span class="btn-sub-label">🍂 移除</span></button>
+                <button class="btn-weight sub" id="sub-left-1" onclick="removeWeight('left', 1)"><span class="math-txt">- 1g</span> <span class="btn-sub-label">🍂 移除</span></button>
+                <button class="btn-weight sub" id="sub-left-5" onclick="removeWeight('left', 5)"><span class="math-txt">- 5g</span> <span class="btn-sub-label">🍂 移除</span></button>
+                <button class="btn-weight sub" id="sub-left-10" onclick="removeWeight('left', 10)"><span class="math-txt">- 10g</span> <span class="btn-sub-label">🍂 移除</span></button>
+            </div>
+            <button class="reset-btn" onclick="resetSimulation()">還原初始設定</button>
+        </div>
+
+        <div class="balance-box">
+            <div class="balance-beam-container">
+                <div class="pillar-base"></div>
+                <div class="pillar"></div>
+                <div class="beam" id="beam">
+                    <div class="pan-group left" id="panGroupL">
+                        <div class="string"></div>
+                        <div class="pan" id="panL"></div>
+                    </div>
+                    <div class="pan-group right" id="panGroupR">
+                        <div class="string"></div>
+                        <div class="pan" id="panR"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="instruction" id="guide">
+                觀察：兩邊同加或同減相同重量，天平依然保持水平。
+            </div>
+        </div>
+
+        <div class="control-card">
+            <h3>右側天秤 <span class="math-font">(Right)</span></h3>
+            <div class="weight-btn-grid">
+                <button class="btn-weight add var" onclick="add('right', 'v')"><span class="math-txt var-add-txt">+ y</span> <span class="btn-sub-label">🎁 未知數袋</span></button>
+                <button class="btn-weight add" onclick="add('right', 1)"><span class="math-txt">+ 1g</span> <span class="btn-sub-label">🌿 增加</span></button>
+                <button class="btn-weight add" onclick="add('right', 5)"><span class="math-txt">+ 5g</span> <span class="btn-sub-label">🌳 增加</span></button>
+                <button class="btn-weight add" onclick="add('right', 10)"><span class="math-txt">+ 10g</span> <span class="btn-sub-label">🌲 增加</span></button>
+            </div>
+            <div class="weight-btn-grid">
+                <button class="btn-weight sub var" id="sub-right-v" onclick="removeWeight('right', 'v')"><span class="math-txt var-sub-txt">- y</span> <span class="btn-sub-label">🍂 移除</span></button>
+                <button class="btn-weight sub" id="sub-right-1" onclick="removeWeight('right', 1)"><span class="math-txt">- 1g</span> <span class="btn-sub-label">🍂 移除</span></button>
+                <button class="btn-weight sub" id="sub-right-5" onclick="removeWeight('right', 5)"><span class="math-txt">- 5g</span> <span class="btn-sub-label">🍂 移除</span></button>
+                <button class="btn-weight sub" id="sub-right-10" onclick="removeWeight('right', 10)"><span class="math-txt">- 10g</span> <span class="btn-sub-label">🍂 移除</span></button>
+            </div>
+            <button class="reset-btn" onclick="resetSimulation()">還原初始設定</button>
+        </div>
+    </div>
+
+    <div class="formula-container math-font" id="formula">
+        <span id="m-left">y + 2</span>
+        <span id="m-sign" style="margin: 0 20px; color: #d84315;">=</span>
+        <span id="m-right">3</span>
+    </div>
+</div>
+
+<script>
+    let currentMode = 'eq'; 
+    let weights = {
+        left: { v: 0, w1: 0, w5: 0, w10: 0 },
+        right: { v: 0, w1: 0, w5: 0, w10: 0 }
+    };
+
+    function resetSimulation() { setMode(currentMode); }
+
+    function setMode(m) {
+        currentMode = m;
+        document.getElementById('btn-eq').classList.toggle('active', m === 'eq');
+        document.getElementById('btn-ineq').classList.toggle('active', m === 'ineq');
+        
+        // 更新按鈕上的 x / y 文字
+        let varName = m === 'eq' ? 'y' : 'x';
+        document.querySelectorAll('.var-add-txt').forEach(el => el.innerText = '+ ' + varName);
+        document.querySelectorAll('.var-sub-txt').forEach(el => el.innerText = '- ' + varName);
+
+        const guide = document.getElementById('guide');
+        if(m === 'eq') {
+            // y = 1g。 左邊 1g + 2 = 3g。 右邊 3g。
+            weights.left = { v: 1, w1: 2, w5: 0, w10: 0 };
+            weights.right = { v: 0, w1: 3, w5: 0, w10: 0 };
+            guide.innerHTML = "現在左邊放了未知數 <b>y</b>(重1g)，天平平衡。試著兩邊同加減！";
+        } else {
+            // x = 2g。 左邊 2g + 2 = 4g。 右邊 3g。 (左邊重，相差1g)
+            weights.left = { v: 1, w1: 2, w5: 0, w10: 0 };
+            weights.right = { v: 0, w1: 3, w5: 0, w10: 0 };
+            guide.innerHTML = "現在未知數 <b>x</b> 重 2g。左邊共 4g ＞ 右邊 3g。如果<b>在右邊加 1g</b> 會發生什麼事？";
+        }
+        updateUI();
+    }
+
+    function add(side, val) {
+        if (val === 'v') weights[side].v++;
+        if (val === 1) weights[side].w1++;
+        if (val === 5) weights[side].w5++;
+        if (val === 10) weights[side].w10++;
+        updateUI();
+    }
+
+    function removeWeight(side, val) {
+        if (val === 'v' && weights[side].v > 0) weights[side].v--;
+        if (val === 1 && weights[side].w1 > 0) weights[side].w1--;
+        if (val === 5 && weights[side].w5 > 0) weights[side].w5--;
+        if (val === 10 && weights[side].w10 > 0) weights[side].w10--;
+        updateUI();
+    }
+
+    function calculateTotalWeight(sideData) {
+        let total = sideData.w1 * 1 + sideData.w5 * 5 + sideData.w10 * 10;
+        let varWeight = (currentMode === 'eq') ? 1 : 2; // 方程式y重1g，不等式x重2g
+        total += sideData.v * varWeight;
+        return total;
+    }
+
+    function updateUI() {
+        renderPan('panL', weights.left);
+        renderPan('panR', weights.right);
+
+        // 防呆：沒有東西不能減
+        ['left', 'right'].forEach(side => {
+            document.getElementById(`sub-${side}-v`).disabled = weights[side].v === 0;
+            document.getElementById(`sub-${side}-1`).disabled = weights[side].w1 === 0;
+            document.getElementById(`sub-${side}-5`).disabled = weights[side].w5 === 0;
+            document.getElementById(`sub-${side}-10`).disabled = weights[side].w10 === 0;
+        });
+
+        const sumL = calculateTotalWeight(weights.left);
+        const sumR = calculateTotalWeight(weights.right);
+
+        let tilt = 0; let sign = "=";
+        if (sumL > sumR) { tilt = -12; sign = ">"; } 
+        else if (sumL < sumR) { tilt = 12; sign = "<"; } 
+        else { tilt = 0; sign = "="; }
+
+        // 天平物理旋轉
+        document.getElementById('beam').style.transform = `rotate(${tilt}deg)`;
+        document.getElementById('panGroupL').style.transform = `rotate(${-tilt}deg)`;
+        document.getElementById('panGroupR').style.transform = `rotate(${-tilt}deg)`;
+
+        // 更新數學算式
+        document.getElementById('m-left').textContent = formatExpr(weights.left);
+        document.getElementById('m-right').textContent = formatExpr(weights.right);
+        document.getElementById('m-sign').textContent = sign;
+    }
+
+    function renderPan(id, sideData) {
+        const pan = document.getElementById(id);
+        pan.innerHTML = '';
+        
+        // 渲染變數袋
+        for(let i=0; i<sideData.v; i++) {
+            const div = document.createElement('div');
+            div.className = 'item variable-x math-font';
+            div.innerText = currentMode === 'eq' ? 'y' : 'x';
+            pan.appendChild(div);
+        }
+        // 渲染砝碼 (大到小)
+        for(let i=0; i<sideData.w10; i++) renderWeight(pan, 10);
+        for(let i=0; i<sideData.w5; i++) renderWeight(pan, 5);
+        for(let i=0; i<sideData.w1; i++) renderWeight(pan, 1);
+    }
+
+    function renderWeight(panEl, val) {
+        const div = document.createElement('div');
+        div.className = `item w-${val} math-font`;
+        div.innerText = val;
+        panEl.appendChild(div);
+    }
+
+    function formatExpr(sideData) {
+        let vCount = sideData.v;
+        let sum = sideData.w1 * 1 + sideData.w5 * 5 + sideData.w10 * 10;
+        let varName = currentMode === 'eq' ? 'y' : 'x';
+
+        let res = "";
+        if (vCount === 1) res = varName;
+        else if (vCount > 1) res = vCount + varName;
+
+        if (sum > 0) {
+            if (res) res += " + " + sum;
+            else res = sum.toString();
+        }
+        return res || "0";
+    }
+
+    // 啟動
+    setMode('eq');
+</script>
+</body>
+</html>
