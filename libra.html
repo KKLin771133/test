@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天秤觀察</title>
+    <title>天平觀察</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
@@ -65,7 +65,7 @@
 
         @keyframes drift { from { transform: translateX(-300px); } to { transform: translateX(1400px); } }
 
-        /* 標題與切換選單（加大容納寬度） */
+        /* 標題與切換選單 */
         .header {
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             background: #ffffff; padding: 15px 60px; border-radius: 60px;
@@ -74,7 +74,7 @@
         .header h1 { margin: 0 0 10px 0; color: var(--leaf); font-size: 36px; letter-spacing: 2px; }
         .mode-switch { display: flex; gap: 12px; justify-content: center; }
         
-        /* 模式切換按鈕（修正文字不換行與寬度問題） */
+        /* 模式切換按鈕 */
         .btn-mode {
             padding: 8px 28px; border: 2px solid var(--wood-light); background: #fff;
             border-radius: 25px; cursor: pointer; font-size: 18px; font-family: inherit;
@@ -102,7 +102,7 @@
         }
         .control-card h3 { margin: 0 0 10px 0; color: var(--wood-dark); text-align: center; font-size: 24px; position: relative; z-index: 1; }
 
-        /* 網格排版：2 欄 2 列 */
+        /* 網格排版 */
         .weight-btn-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
             position: relative; z-index: 1; margin-bottom: 12px;
@@ -170,7 +170,7 @@
             padding: 5px 10px; gap: 4px; box-shadow: 0 8px 10px rgba(0,0,0,0.2); position: relative; margin-top: -5px; z-index: 6;
         }
 
-        /* 課本風立體大砝碼 (保留提把) */
+        /* 課本風立體大砝碼 */
         .item {
             position: relative; display: flex; align-items: center; justify-content: center;
             color: white; font-weight: bold; box-shadow: 1px 3px 5px rgba(0,0,0,0.3); animation: dropIn 0.2s ease-out;
@@ -255,7 +255,7 @@
     </div>
 
     <div class="header">
-        <h1>天秤觀察</h1>
+        <h1>天平觀察室</h1>
         <div class="mode-switch">
             <button id="btn-eq" class="btn-mode active" onclick="setMode('eq')">等量公理 (方程式)</button>
             <button id="btn-ineq" class="btn-mode" onclick="setMode('ineq')">不等式性質</button>
@@ -265,7 +265,7 @@
 
     <div class="interaction-area">
         <div class="control-card">
-            <h3>左側天秤 <span class="math-font">(Left)</span></h3>
+            <h3>左側天平 <span class="math-font">(Left)</span></h3>
             <div class="weight-btn-grid">
                 <button class="btn-weight add var" onclick="add('left', 'v')"><span class="math-txt var-add-txt">+ x</span> <span class="btn-sub-label">🎁 未知數袋</span></button>
                 <button class="btn-weight add" onclick="add('left', 1)"><span class="math-txt">+ 1g</span> <span class="btn-sub-label">🌿 增加</span></button>
@@ -302,7 +302,7 @@
         </div>
 
         <div class="control-card">
-            <h3>右側天秤 <span class="math-font">(Right)</span></h3>
+            <h3>右側天平 <span class="math-font">(Right)</span></h3>
             <div class="weight-btn-grid">
                 <button class="btn-weight add var" onclick="add('right', 'v')"><span class="math-txt var-add-txt">+ x</span> <span class="btn-sub-label">🎁 未知數袋</span></button>
                 <button class="btn-weight add" onclick="add('right', 1)"><span class="math-txt">+ 1g</span> <span class="btn-sub-label">🌿 增加</span></button>
@@ -345,21 +345,18 @@
         const guide = document.getElementById('guide');
         const modal = document.getElementById('custom-modal');
 
-        // 統一將變數符號固定為 x
         let varName = 'x';
         document.querySelectorAll('.var-add-txt').forEach(el => el.innerText = '+ ' + varName);
         document.querySelectorAll('.var-sub-txt').forEach(el => el.innerText = '- ' + varName);
 
         if(m === 'eq') {
             modal.style.display = 'none';
-            // x = 1g。 左邊 1g + 2 = 3g。 右邊 3g。
             weights.left = { v: 1, w1: 2, w5: 0, w10: 0 };
             weights.right = { v: 0, w1: 3, w5: 0, w10: 0 };
             guide.innerHTML = "現在左邊放了未知數 <b>x</b>(重1g)，天平平衡。試著兩邊同加減！";
             updateUI();
         } else if(m === 'ineq') {
             modal.style.display = 'none';
-            // x = 2g。 左邊 2g + 2 = 4g。 右邊 3g。 (精密微調：相差剛好 1g)
             weights.left = { v: 1, w1: 2, w5: 0, w10: 0 };
             weights.right = { v: 0, w1: 3, w5: 0, w10: 0 };
             guide.innerHTML = "現在未知數 <b>x</b> 重 2g。左邊共 4g ＞ 右邊 3g。如果<b>在右邊加 1g</b> 會發生什麼事？";
